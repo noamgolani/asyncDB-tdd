@@ -1,4 +1,5 @@
 import DB from "../src/DB";
+import Entry, { ReadOnlyEntry } from "../src/Entry";
 import fs from "fs/promises";
 import fsSync from "fs";
 import { validate } from "uuid";
@@ -7,10 +8,22 @@ import path from "path";
 const TEST_DB_DIR = "testDB";
 
 afterAll(() => {
-  fsSync.rmdirSync(TEST_DB_DIR, { recursive: true });
+  try {
+    fsSync.rmdirSync(TEST_DB_DIR, { recursive: true });
+  } catch {
+    return;
+  }
 });
 
-describe("Constructor", () => {
+beforeAll(() => {
+  try {
+    fsSync.rmdirSync(TEST_DB_DIR, { recursive: true });
+  } catch {
+    return;
+  }
+});
+
+describe("constructor()", () => {
   test("Should init new empty folder if not exists", async () => {
     const db = new DB(TEST_DB_DIR);
     expect(db).toBeInstanceOf(DB);
@@ -25,7 +38,7 @@ describe("Constructor", () => {
   });
 });
 
-describe("store", () => {
+describe("store()", () => {
   const db = new DB(TEST_DB_DIR);
   const data = { test: "test" };
   let newId;
@@ -50,5 +63,30 @@ describe("store", () => {
       // check if parsble
       Date(dataObj.timestemp);
     }).not.toThrow();
+  });
+});
+
+describe("get()", () => {
+  const db = new DB(TEST_DB_DIR);
+  const data = { test: "test" };
+  let entry, readOnly;
+
+  test("Should return Entry", async () => {
+    const id = await db.store(data);
+    entry = await db.get(id);
+    expect(entry).toBeInstanceOf(Entry);
+  });
+
+  test("Entry value should be the data", () => {
+    expect(entry.value).toEqual(data);
+  });
+
+  test("Entry should have timestemp property", () => {
+    expect(entry.timestemp).toBeDefined();
+  });
+
+  test("Entry should have be of readOnly instace if its readonly and Entry if can be changed", async () => {
+    readOnly = await db.get(await db.store(data, true));
+    expect(readOnly).toBeInstanceOf(ReadOnlyEntry);
   });
 });

@@ -3,6 +3,8 @@ import fsSync from "fs";
 import path from "path";
 import { v4 } from "uuid";
 
+import Entry, { ReadOnlyEntry } from "./Entry";
+
 export default class DB {
   #dir;
   constructor(dir) {
@@ -21,5 +23,14 @@ export default class DB {
       })
     );
     return id;
+  }
+
+  async get(id) {
+    const filePath = path.join(this.#dir, id);
+    const { data, readOnly, timestemp } = JSON.parse(
+      await fs.readFile(filePath)
+    );
+    if (readOnly) return new ReadOnlyEntry(data, timestemp);
+    return new Entry(data, timestemp);
   }
 }
