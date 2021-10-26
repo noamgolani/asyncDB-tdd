@@ -7,7 +7,16 @@ import path from "path";
 
 const TEST_DB_DIR = "testDB";
 
+//TODO split to two files -> DB + Entry
 beforeAll(() => {
+  try {
+    fsSync.rmdirSync(TEST_DB_DIR, { recursive: true });
+  } catch {
+    return;
+  }
+});
+
+afterAll(() => {
   try {
     fsSync.rmdirSync(TEST_DB_DIR, { recursive: true });
   } catch {
