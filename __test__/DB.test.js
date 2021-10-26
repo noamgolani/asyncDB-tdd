@@ -6,10 +6,13 @@ import path from "path";
 
 const TEST_DB_DIR = "testDB";
 
-describe("Constructor", () => {
+afterAll(() => {
   fsSync.rmdirSync(TEST_DB_DIR, { recursive: true });
+});
+
+describe("Constructor", () => {
   test("Should init new empty folder if not exists", async () => {
-    const db = new DB("TEST_DB_DIR");
+    const db = new DB(TEST_DB_DIR);
     expect(db).toBeInstanceOf(DB);
     expect(await fs.readdir("./")).toContain(TEST_DB_DIR);
   });
