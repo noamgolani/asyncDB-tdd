@@ -162,3 +162,18 @@ describe("Iterator", () => {
     expect(counter).toBe(10);
   });
 });
+
+describe("To String", () => {
+  const db = new DB(TEST_DB_DIR);
+
+  test("Should be an array of all ids", () => {
+    const dir = fsSync.readdirSync(TEST_DB_DIR);
+    expect(db.toString()).toBe(JSON.stringify(dir));
+  });
+
+  test("Should be a string of the data", async () => {
+    const data = { hey: "dis data" };
+    const entry = await db.get(await db.store(data));
+    expect(entry.toString()).toBe(JSON.stringify(data));
+  });
+});

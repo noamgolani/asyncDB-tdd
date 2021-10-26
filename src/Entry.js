@@ -12,6 +12,10 @@ export default class Entry {
     return this.#data;
   }
 
+  toString() {
+    return JSON.stringify(this.#data);
+  }
+
   async setValue(val) {
     await this.#actionCB("SET", val);
     this.#data = val;
@@ -31,7 +35,7 @@ export class ReadOnlyEntry extends Entry {
     super(...args);
   }
 
-  setValue(val) {
+  setValue() {
     return Promise.reject(new Error("Cant change read only entry"));
   }
 }

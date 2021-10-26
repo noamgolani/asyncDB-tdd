@@ -74,4 +74,8 @@ export default class DB {
       },
     };
   }
+
+  toString() {
+    return JSON.stringify(fsSync.readdirSync(this.#dir));
+  }
 }
