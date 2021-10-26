@@ -17,6 +17,10 @@ export default class Entry {
     this.#data = val;
   }
 
+  async remove() {
+    await this.#actionCB("REMOVE");
+  }
+
   get timestemp() {
     return this.#timestemp;
   }

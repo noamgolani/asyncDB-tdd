@@ -1,7 +1,7 @@
 import DB from "../src/DB";
 import Entry, { ReadOnlyEntry } from "../src/Entry";
 import fs from "fs/promises";
-import fsSync, { read } from "fs";
+import fsSync from "fs";
 import { validate } from "uuid";
 import path from "path";
 
@@ -114,9 +114,24 @@ describe("Updating Entry", () => {
 
   test("Setting entry value should update the Entry file", async () => {
     const fileCont = await fs.readFile(path.join(TEST_DB_DIR, entryId));
-    const { data, timestemp, readOnly } = JSON.parse(fileCont);
+    const { data, readOnly } = JSON.parse(fileCont);
     // TODO test timestemp
     expect(readOnly).toBe(false);
     expect(data).toEqual(newData);
+  });
+});
+
+describe("Removing Entry", () => {
+  const db = new DB(TEST_DB_DIR);
+
+  test("Removing an entry should remove the file", async () => {
+    const entryId = await db.store({ data: "ASD" });
+    const entry = await db.get(entryId);
+    const fileDir = path.join(TEST_DB_DIR, entryId);
+    const fileCont = await fs.readFile(fileDir);
+    expect(fileCont).not.toBeNull();
+    await entry.remove();
+    const exists = fsSync.existsSync(fileDir);
+    expect(exists).toBe(false);
   });
 });

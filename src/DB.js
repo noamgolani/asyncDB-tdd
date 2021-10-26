@@ -48,6 +48,10 @@ export default class DB {
           })
         );
         break;
+      case "REMOVE":
+        //Wierd problem with promive version
+        fsSync.rmSync(path.join(this.#dir, id));
+        break;
     }
   }
 }
