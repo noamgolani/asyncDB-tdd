@@ -31,10 +31,6 @@
 
 class Entry {
 
-  remove() {
-    throw "unimplemented";
-  }
-
   toString() {
     return JSON.stringify(this.value);
   }

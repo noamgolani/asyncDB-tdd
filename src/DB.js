@@ -12,6 +12,14 @@ export default class DB {
     if (!fsSync.existsSync(dir)) fsSync.mkdirSync(dir);
   }
 
+  removeAll() {
+    fsSync.rmdirSync(this.#dir, { recursive: true });
+  }
+
+  get size() {
+    return fsSync.readdirSync(this.#dir).length;
+  }
+
   async store(data, readOnly = false) {
     const id = v4();
     await fs.writeFile(
@@ -53,5 +61,17 @@ export default class DB {
         fsSync.rmSync(path.join(this.#dir, id));
         break;
     }
+  }
+
+  [Symbol.iterator]() {
+    const ids = fsSync.readdirSync(this.#dir);
+    let id = -1;
+    return {
+      next: () => {
+        if (id === this.size - 1) return { done: true };
+        id++;
+        return { value: this.get(ids[id]) };
+      },
+    };
   }
 }

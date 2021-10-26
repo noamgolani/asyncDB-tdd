@@ -7,14 +7,6 @@ import path from "path";
 
 const TEST_DB_DIR = "testDB";
 
-afterAll(() => {
-  try {
-    fsSync.rmdirSync(TEST_DB_DIR, { recursive: true });
-  } catch {
-    return;
-  }
-});
-
 beforeAll(() => {
   try {
     fsSync.rmdirSync(TEST_DB_DIR, { recursive: true });
@@ -121,7 +113,7 @@ describe("Updating Entry", () => {
   });
 });
 
-describe("Removing Entry", () => {
+describe("Removing", () => {
   const db = new DB(TEST_DB_DIR);
 
   test("Removing an entry should remove the file", async () => {
@@ -133,5 +125,40 @@ describe("Removing Entry", () => {
     await entry.remove();
     const exists = fsSync.existsSync(fileDir);
     expect(exists).toBe(false);
+  });
+
+  test("RemoveAll should remove all the DB", async () => {
+    expect(db.size).not.toBe(0);
+    await db.removeAll();
+    expect(fsSync.existsSync(TEST_DB_DIR)).toBe(false);
+  });
+});
+
+describe("Iterator", () => {
+  let db;
+
+  beforeAll(() => {
+    db = new DB(TEST_DB_DIR);
+    db.removeAll();
+    db = new DB(TEST_DB_DIR);
+  });
+
+  test("Size should return number of keys", async () => {
+    expect(db.size).toBe(0);
+    for (let index = 0; index < 10; index++) {
+      await db.store({ index });
+    }
+    expect(db.size).toBe(10);
+  });
+
+  test("Should be valid iterator", async () => {
+    let counter = 0;
+    for (const entry of db) {
+      const e = await entry;
+      expect(e).toBeInstanceOf(Entry);
+      expect(e.value.index).toBeDefined();
+      counter++;
+    }
+    expect(counter).toBe(10);
   });
 });
