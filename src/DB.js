@@ -9,7 +9,7 @@ export default class DB {
   #dir;
   constructor(dir) {
     this.#dir = dir;
-    if (!fsSync.existsSync(dir)) fs.mkdir(dir);
+    if (!fsSync.existsSync(dir)) fsSync.mkdirSync(dir);
   }
 
   async store(data, readOnly = false) {
@@ -31,6 +31,23 @@ export default class DB {
       await fs.readFile(filePath)
     );
     if (readOnly) return new ReadOnlyEntry(data, timestemp);
-    return new Entry(data, timestemp);
+    return new Entry(data, timestemp, (action, ...args) => {
+      this.#actionCB(id, action, ...args);
+    });
+  }
+
+  async #actionCB(id, action, ...args) {
+    switch (action) {
+      case "SET":
+        await fs.writeFile(
+          path.join(this.#dir, id),
+          JSON.stringify({
+            data: args[0],
+            readOnly: false,
+            timestemp: new Date(Date.now()),
+          })
+        );
+        break;
+    }
   }
 }

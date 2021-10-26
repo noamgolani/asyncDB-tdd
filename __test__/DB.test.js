@@ -1,7 +1,7 @@
 import DB from "../src/DB";
 import Entry, { ReadOnlyEntry } from "../src/Entry";
 import fs from "fs/promises";
-import fsSync from "fs";
+import fsSync, { read } from "fs";
 import { validate } from "uuid";
 import path from "path";
 
@@ -88,5 +88,35 @@ describe("get()", () => {
   test("Entry should have be of readOnly instace if its readonly and Entry if can be changed", async () => {
     readOnly = await db.get(await db.store(data, true));
     expect(readOnly).toBeInstanceOf(ReadOnlyEntry);
+  });
+});
+
+describe("Updating Entry", () => {
+  const db = new DB(TEST_DB_DIR);
+  const data = { test: "test" };
+  const newData = { new: "data" };
+  let entry, entryId;
+
+  test("Setting entry value, should update its value", async () => {
+    entryId = await db.store(data);
+    entry = await db.get(entryId);
+    await entry.setValue(newData);
+    expect(entry.value).toEqual(newData);
+  });
+
+  test("Setting read only entry value should throw an Error", async () => {
+    const readOnly = await db.get(await db.store(data, true));
+    expect(readOnly).toBeInstanceOf(ReadOnlyEntry);
+    await expect(async () => {
+      await readOnly.setValue(newData);
+    }).rejects.toThrow();
+  });
+
+  test("Setting entry value should update the Entry file", async () => {
+    const fileCont = await fs.readFile(path.join(TEST_DB_DIR, entryId));
+    const { data, timestemp, readOnly } = JSON.parse(fileCont);
+    // TODO test timestemp
+    expect(readOnly).toBe(false);
+    expect(data).toEqual(newData);
   });
 });

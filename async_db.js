@@ -12,6 +12,7 @@ class DB {
     return this.#keys.length;
   }
 
+  //implemented
   async get(key) {
     const content = await fs.readFile(`${this.#dir}/${key}`, "utf8");
     const { data, readOnly, timestamp } = JSON.parse(content);
