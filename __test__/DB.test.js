@@ -1,4 +1,4 @@
-import DB from "../DB";
+import DB from "../src/DB";
 import fs from "fs/promises";
 import fsSync from "fs";
 import { validate } from "uuid";
